@@ -66,7 +66,7 @@ async def on_message(message):
     if not content:
         await message.reply(
             f"{message.author.mention} iya kenapa 😅",
-            mention_author=True
+            mention_author=False
         )
         return
 
