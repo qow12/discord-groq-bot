@@ -18,6 +18,7 @@ bot = discord.Client(intents=intents)
 
 MODEL = "llama-3.1-8b-instant"
 TZ = pytz.timezone("Asia/Jakarta")
+PREFIX = "orca"
 
 user_cooldown = {}
 COOLDOWN = 5
@@ -43,7 +44,7 @@ async def on_message(message):
         return
 
     # 🔥 HANYA JALAN KALAU BOT DI-MENTION
-    if bot.user not in message.mentions:
+    if not message.content.startswith(PREFIX):
         return
 
     # cooldown
@@ -60,7 +61,7 @@ async def on_message(message):
     user_cooldown[user_id] = now
 
     # bersihin mention bot dari teks
-    content = message.content.replace(f"<@{bot.user.id}>", "").replace(f"<@!{bot.user.id}>", "").strip()
+    content = message.content[len(PREFIX):].strip()
 
     if not content:
         await message.reply(
