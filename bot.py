@@ -106,7 +106,7 @@ Balas seolah-olah ngomong langsung ke dia.
                     {"role": "user", "content": content}
                 ],
                 temperature=0.7,
-                max_tokens=250,
+                max_tokens=2000,
                 top_p=0.9
             )
 
