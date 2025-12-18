@@ -28,6 +28,7 @@ MAX_DISCORD_CHARS = 1900
 BOT_NAME = "sunnie"
 
 user_cooldown = {}
+user_topic = {}
 
 # ================== SYSTEM PROMPT ==================
 BASE_SYSTEM_PROMPT = """
@@ -138,17 +139,49 @@ async def on_message(message):
     nickname = message.author.display_name
     now_time = datetime.now(TZ).strftime("%A, %d %B %Y %H:%M WIB")
     called_bot_name = BOT_NAME.lower() in content.lower()
+    change_topic_keywords = [
+        "ganti topik",
+        "bahas lain",
+        "topik lain",
+        "lupakan yang tadi",
+        "skip",
+        "pindah topik"
+    ]
+
+    want_change_topic = any(k in content.lower() for k in change_topic_keywords)
+
+    if want_change_topic:
+        user_topic.pop(message.author.id, None)
+        
+    if message.author.id not in user_topic:
+        user_topic[message.author.id] = content
 
     # ================== PROMPT ==================
+    current_topic = user_topic.get(message.author.id, "belum ada topik khusus")
+
     system_prompt = f"""
 {BASE_SYSTEM_PROMPT}
 
-Nama orang yang lagi ngobrol sama kamu: {nickname}.
-Panggil dia pakai nama itu secara natural, jangan tiap kalimat.
+Nama kamu adalah {BOT_NAME}.
+Kamu sadar penuh bahwa kamu adalah {BOT_NAME}.
+Kalau namamu dipanggil, respon refleks dan spontan.
 
-{"User sedang memanggil nama kamu secara langsung." if called_bot_name else ""}
-Kalau kamu dipanggil, respon lebih refleks dan spontan.
+Nama orang yang lagi ngobrol sama kamu: {nickname}.
+Panggil dia secara natural, jangan lebay.
+
+Topik yang sedang dibahas saat ini:
+"{current_topic}"
+
+Aturan topik:
+- Kalau user masih nyambung → LANJUTKAN topik ini
+- Jangan lompat topik sendiri
+- Kalau user minta ganti topik → ikuti dan mulai fresh
+- Kalau user mulai bahasan baru secara jelas → anggap itu topik baru
+
+Waktu sekarang: {now_time}.
+Balas seperti ngobrol beneran, bukan QnA.
 """
+
 
     # ================== GROQ ==================
     async with message.channel.typing():
